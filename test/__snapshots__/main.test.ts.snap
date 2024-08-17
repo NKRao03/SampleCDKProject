@@ -1,0 +1,341 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Snapshot 1`] = `
+{
+  "Outputs": {
+    "quotesapiEndpointCDB5087B": {
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "https://",
+            {
+              "Ref": "quotesapi4272A3FB",
+            },
+            ".execute-api.",
+            {
+              "Ref": "AWS::Region",
+            },
+            ".",
+            {
+              "Ref": "AWS::URLSuffix",
+            },
+            "/",
+            {
+              "Ref": "quotesapiDeploymentStageprodB9ED9587",
+            },
+            "/",
+          ],
+        ],
+      },
+    },
+  },
+  "Parameters": {
+    "BootstrapVersion": {
+      "Default": "/cdk-bootstrap/hnb659fds/version",
+      "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+    },
+  },
+  "Resources": {
+    "HelloFunctionD909AE8C": {
+      "DependsOn": [
+        "HelloFunctionServiceRole186F1BA8",
+      ],
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Fn::Sub": "cdk-hnb659fds-assets-\${AWS::AccountId}-\${AWS::Region}",
+          },
+          "S3Key": "6fc2dfe69993017645f33d8425ac991909a366a0e2bab7a30e00ff98b9117f8e.zip",
+        },
+        "Handler": "quotes.quotesHandler",
+        "MemorySize": 512,
+        "Role": {
+          "Fn::GetAtt": [
+            "HelloFunctionServiceRole186F1BA8",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs18.x",
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "HelloFunctionServiceRole186F1BA8": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "quotesapi4272A3FB": {
+      "Properties": {
+        "Description": "quotes API",
+        "Name": "quotes-api",
+      },
+      "Type": "AWS::ApiGateway::RestApi",
+    },
+    "quotesapiAccountCEB793D1": {
+      "DeletionPolicy": "Retain",
+      "DependsOn": [
+        "quotesapi4272A3FB",
+      ],
+      "Properties": {
+        "CloudWatchRoleArn": {
+          "Fn::GetAtt": [
+            "quotesapiCloudWatchRoleA56F6F53",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "AWS::ApiGateway::Account",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "quotesapiCloudWatchRoleA56F6F53": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "apigateway.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs",
+              ],
+            ],
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "quotesapiDeploymentFC288F4F01826f2b90996019467369fd55e56f00": {
+      "DependsOn": [
+        "quotesapiquotesGETCD58A3E2",
+        "quotesapiquotesD8AF2BC8",
+      ],
+      "Properties": {
+        "Description": "quotes API",
+        "RestApiId": {
+          "Ref": "quotesapi4272A3FB",
+        },
+      },
+      "Type": "AWS::ApiGateway::Deployment",
+    },
+    "quotesapiDeploymentStageprodB9ED9587": {
+      "DependsOn": [
+        "quotesapiAccountCEB793D1",
+      ],
+      "Properties": {
+        "DeploymentId": {
+          "Ref": "quotesapiDeploymentFC288F4F01826f2b90996019467369fd55e56f00",
+        },
+        "RestApiId": {
+          "Ref": "quotesapi4272A3FB",
+        },
+        "StageName": "prod",
+      },
+      "Type": "AWS::ApiGateway::Stage",
+    },
+    "quotesapiquotesD8AF2BC8": {
+      "Properties": {
+        "ParentId": {
+          "Fn::GetAtt": [
+            "quotesapi4272A3FB",
+            "RootResourceId",
+          ],
+        },
+        "PathPart": "quotes",
+        "RestApiId": {
+          "Ref": "quotesapi4272A3FB",
+        },
+      },
+      "Type": "AWS::ApiGateway::Resource",
+    },
+    "quotesapiquotesGETApiPermissionTesttestquotesapiEA73B18EGETquotes01D578D2": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "HelloFunctionD909AE8C",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "quotesapi4272A3FB",
+              },
+              "/test-invoke-stage/GET/quotes",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "quotesapiquotesGETApiPermissiontestquotesapiEA73B18EGETquotesE343E3FB": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "HelloFunctionD909AE8C",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "quotesapi4272A3FB",
+              },
+              "/",
+              {
+                "Ref": "quotesapiDeploymentStageprodB9ED9587",
+              },
+              "/GET/quotes",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "quotesapiquotesGETCD58A3E2": {
+      "Properties": {
+        "AuthorizationType": "NONE",
+        "HttpMethod": "GET",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "HelloFunctionD909AE8C",
+                    "Arn",
+                  ],
+                },
+                "/invocations",
+              ],
+            ],
+          },
+        },
+        "ResourceId": {
+          "Ref": "quotesapiquotesD8AF2BC8",
+        },
+        "RestApiId": {
+          "Ref": "quotesapi4272A3FB",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+  },
+  "Rules": {
+    "CheckBootstrapVersion": {
+      "Assertions": [
+        {
+          "Assert": {
+            "Fn::Not": [
+              {
+                "Fn::Contains": [
+                  [
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                  ],
+                  {
+                    "Ref": "BootstrapVersion",
+                  },
+                ],
+              },
+            ],
+          },
+          "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI.",
+        },
+      ],
+    },
+  },
+}
+`;
