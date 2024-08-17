@@ -1,7 +1,14 @@
-# install httpd (Linux 2 version)
+#!/bin/bash
 yum update -y
-yum install -y httpd
-systemctl start httpd
-systemctl enable httpd
-#echo "<h1>Hello World from $(hostname -f)</h1>"> /var/www/html/index.html
-echo "<h1>Hello World from $(hostname -f)</h1>"> /var/www/html/index.html
+sudo su
+
+amazon-linux-extras install -y nginx1
+systemctl start nginx
+systemctl enable nginx
+
+chmod 2775 /usr/share/nginx/html
+
+find /usr/share/nginx/html -type d -exec chmod 2775 {} \;
+find /usr/share/nginx/html -type f -exec chmod 0664 {} \;
+
+echo "<h1>Hello World from $(hostname -f)</h1>" > /usr/share/nginx/html/index.html
