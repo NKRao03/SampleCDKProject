@@ -6,36 +6,22 @@ import {
   InstanceType,
   KeyPair,
   MachineImage,
-  Peer,
-  Port,
-  SecurityGroup,
   SubnetType,
   UserData,
-  Vpc,
 } from "aws-cdk-lib/aws-ec2";
 import { ManagedPolicy, Role, ServicePrincipal } from "aws-cdk-lib/aws-iam";
-import { Construct } from "constructs";
 import fs from "fs";
+import { SecurityGroupStack } from "./Resources/SecurityGroup";
 
 export class myEC2Stack extends Stack {
-  constructor(scope: Construct, id: string, props?: StackProps) {
+  constructor(scope: App, id: string, props?: StackProps) {
     super(scope, id, props);
 
-    //Creating a VPC
-    const vpc = new Vpc(this, "default-vpc", {
-      cidr: "10.0.0.0/16",
-      maxAzs: 1,
-      subnetConfiguration: [{ name: "public", subnetType: SubnetType.PUBLIC }],
-    });
-
-    //Add a security group
-    const security_grp = new SecurityGroup(this, "default-sg", {
-      vpc,
-      allowAllOutbound: true,
-    });
-    //Ingress RUles
-    security_grp.addIngressRule(Peer.anyIpv4(), Port.tcp(22), "SSH Access");
-    security_grp.addIngressRule(Peer.anyIpv4(), Port.tcp(80), "HTTP Access");
+    //Add a security group, Importing a VPC
+    const { security_grp, defaultvpc } = new SecurityGroupStack(
+      this,
+      "new-sec-grp"
+    );
 
     //Read public key from localmachine
     const publicKey = fs.readFileSync(`${process.env.HOME}/.ssh/ec2keys.pub`);
@@ -43,6 +29,13 @@ export class myEC2Stack extends Stack {
     const keyP = new KeyPair(this, "ec2keys", {
       publicKeyMaterial: String(publicKey),
     });
+
+    //Create an EBS Volume
+    // const { ebsvol } = new ebsContruct(this, "new-ebsvol");
+    // console.log(ebsvol.volumeId);
+    //Import VolumeID
+    // const EBSVolumeID = Fn.importValue("EBSVolumeID");
+    // console.log(EBSVolumeID);
 
     //Create a Role for EC2 instance
     const ec2role = new Role(this, "ec2-role", {
@@ -57,7 +50,7 @@ export class myEC2Stack extends Stack {
 
     //Create an EC2 instance
     const ec2Instance = new Instance(this, "default-ec2", {
-      vpc: vpc,
+      vpc: defaultvpc.vpc,
       vpcSubnets: {
         subnetType: SubnetType.PUBLIC,
       },
@@ -69,10 +62,31 @@ export class myEC2Stack extends Stack {
       userData: UserData.custom(sciptContent),
     });
 
+    //Attach EBS volume to EC2 instance
+
+    // const ec2Clinet = new EC2();
+    // ec2Clinet.attachVolume({
+    //   VolumeId: EBSVolumeID,
+    //   InstanceId: ec2Instance.instanceId,
+    //   Device: '/dev/sdh',
+    // }, (err: Error, _data: any) => {
+    //   if (err) {
+    //     console.log(err);
+    //   }
+    //   else {
+    //     console.log("Volume attached successfully!");
+    //   }
+    // })
+
+    // new CfnVolumeAttachment(this, "volumeattachment", {
+    //   volumeId: EBSVolumeID,
+    //   instanceId: ec2Instance.instanceId,
+    //   device: "/dev/sdh",
+    // });
+
     console.log(`Public IP:`, ec2Instance.instancePublicIp);
     console.log(`Private IP:`, ec2Instance.instancePrivateIp);
     console.log(`EC2 ARN:`, ec2Instance.instanceId);
-    console.log(`VPC ARN:`, vpc.vpcArn);
   }
 }
 
